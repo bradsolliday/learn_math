@@ -13,11 +13,17 @@ class Profile:
             addition_data, multiplication_data = f.read().split("|")[1::2]
 
         def extract_data(data):
-            output = [[0] * 12] * 12
+            # [[0]*12]*12 doesn't work as then there would only be one inner
+            # referenced 12 times in the outer list. This creates 12 distinct
+            # inner lists
+            output = [[0]*12 for i in range(0, 12)]
+
             #for operand1, operand2, score in data.split("\n")[0:-1]:
             for triple in data.split("\n")[0:-1]:
                 operand1, operand2, score = triple.split(",")
-                output[int(operand1)][int(operand2)] = float(score)
+                output[int(operand1) - 1][int(operand2) - 1] = float(score)
+
+            return output
 
         self.addition = extract_data(addition_data)
         self.multiplication = extract_data(multiplication_data)
@@ -41,9 +47,9 @@ class Profile:
             os.makedirs(os.path.dirname(relative_path))
 
         def write_scores(file, score_list):
-            for operand1, op2_list in enumerate(score_list):
-                for operand2, score in enumerate(op2_list):
-                    file.write(f"{operand1},{operand2},{score}\n")
+            for op1_min1, op2_list in enumerate(score_list):
+                for op2_min1, score in enumerate(op2_list):
+                    file.write(f"{op1_min1 + 1},{op2_min1 + 1},{score}\n")
 
         with open(relative_path, "w") as f:
             f.write("Addition Scores (operand1,operand2,score)\n|")
